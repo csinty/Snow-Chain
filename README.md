@@ -10,6 +10,7 @@ Telegram: t.me/csinty
 Discord: csinty_osint
 
  ```bash
-   pip install -r requirements.txt
-   python app.py
-   Open http://127.0.0.1:5000 in your browser.
+git clone https://github.com/csinty/Snow-Chain.git
+cd Snow-Chain
+pip install -r requirements.txt
+python snowchain.py
