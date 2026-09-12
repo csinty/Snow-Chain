@@ -1,392 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snow Chain</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; transition: background 0.3s, color 0.3s; }
-        body.dark-theme { background-color: #2a2a2a; background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 20px 20px; color: #e0e0e0; }
-        body.dark-theme .container { background: rgba(40,40,40,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-        body.dark-theme .filters-section { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
-        body.dark-theme .filter-btn { background: rgba(255,255,255,0.06); color: #ccc; }
-        body.dark-theme .filter-btn:hover { background: rgba(255,255,255,0.12); }
-        body.dark-theme .filter-btn.active { background: #6c8cff; color: #fff; }
-        body.light-theme { background-color: #f0f2f5; background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 20px 20px; color: #222; }
-        body.light-theme .container { background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-        body.light-theme .filters-section { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
-        body.light-theme .filter-btn { background: rgba(0,0,0,0.05); color: #333; }
-        body.light-theme .filter-btn:hover { background: rgba(0,0,0,0.1); }
-        body.light-theme .filter-btn.active { background: #6c8cff; color: #fff; }
-        .container { max-width: 1300px; width: 100%; border-radius: 24px; padding: 30px 35px; transition: background 0.3s, border 0.3s; }
-        .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        body.light-theme .header { border-bottom: 1px solid rgba(0,0,0,0.08); }
-        .profile { display: flex; align-items: center; gap: 18px; }
-        .profile-info { display: flex; flex-direction: column; gap: 4px; }
-        .profile-name { font-size: 20px; font-weight: 600; transition: color 0.3s; }
-        .social-links { display: flex; gap: 12px; flex-wrap: wrap; }
-        .social-link { display: inline-flex; align-items: center; gap: 8px; color: #6c8cff; text-decoration: none; font-size: 15px; font-weight: 500; transition: 0.2s; background: rgba(108,140,255,0.12); padding: 4px 14px 4px 10px; border-radius: 20px; border: 1px solid rgba(108,140,255,0.2); width: fit-content; }
-        body.light-theme .social-link { background: rgba(108,140,255,0.08); border: 1px solid rgba(108,140,255,0.2); }
-        .social-link:hover { background: rgba(108,140,255,0.25); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108,140,255,0.2); }
-        .right-header { display: flex; align-items: center; gap: 16px; }
-        .title-block h1 { font-size: 28px; font-weight: 600; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; transition: color 0.3s; }
-        .title-block h1 i { color: #6c8cff; font-size: 28px; }
-        .title-block small { display: block; font-size: 14px; font-weight: 400; margin-top: 2px; margin-left: 42px; transition: color 0.3s; }
-        @keyframes spinSnowflake { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .snowflake-icon { display: inline-block; animation: spinSnowflake 8s linear infinite; }
-        .theme-switch-wrapper { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; align-items: center; gap: 12px; background: rgba(40,40,40,0.7); backdrop-filter: blur(6px); padding: 6px 10px 6px 14px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 16px rgba(0,0,0,0.3); transition: background 0.3s, border 0.3s; user-select: none; }
-        body.light-theme .theme-switch-wrapper { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-        .theme-switch { position: relative; width: 80px; height: 34px; background: rgba(255,255,255,0.15); border-radius: 20px; cursor: pointer; transition: background 0.3s; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05); }
-        body.light-theme .theme-switch { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.05); }
-        .theme-switch .slider { position: absolute; top: 2px; left: 2px; width: 30px; height: 30px; border-radius: 50%; background: #6c8cff; transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; box-shadow: 0 2px 8px rgba(108,140,255,0.4); }
-        .theme-switch.light .slider { transform: translateX(46px); }
-        .theme-icons { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 6px; position: absolute; top: 0; left: 0; height: 100%; pointer-events: none; font-size: 14px; color: rgba(255,255,255,0.4); }
-        body.light-theme .theme-icons { color: rgba(0,0,0,0.3); }
-        .theme-icons i { opacity: 0.7; }
-        .theme-label { font-size: 13px; font-weight: 500; color: #ccc; transition: color 0.3s; }
-        body.light-theme .theme-label { color: #555; }
-        .form-wrapper { border-radius: 16px; padding: 24px 28px; margin-bottom: 30px; transition: background 0.3s, border 0.3s; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); }
-        body.light-theme .form-wrapper { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 500; font-size: 15px; margin-bottom: 6px; color: inherit; }
-        .form-group label i { margin-right: 8px; color: #6c8cff; }
-        .form-group input { width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 10px; transition: 0.25s ease; outline: none; backdrop-filter: blur(4px); }
-        .form-group .hint { display: block; margin-top: 6px; font-size: 13px; color: #999; }
-        .form-group .hint a { color: #6c8cff; text-decoration: none; }
-        .btn-analyze { background: linear-gradient(135deg, #6c8cff, #4a6cf7); border: none; padding: 14px 28px; font-size: 17px; font-weight: 600; border-radius: 12px; color: #fff; cursor: pointer; transition: 0.25s ease; width: 100%; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(108,140,255,0.3); }
-        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,140,255,0.4); }
-        .error-box { border-left: 4px solid #ff4a4a; padding: 14px 20px; border-radius: 10px; margin-top: 15px; font-weight: 500; transition: background 0.3s, color 0.3s; }
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
-        .results-header h2 { font-weight: 500; font-size: 20px; margin: 0; }
-        .results-header h2 span { color: #6c8cff; font-weight: 600; }
-        .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn-export { background: rgba(108,140,255,0.12); border: 1px solid rgba(108,140,255,0.2); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; color: #6c8cff; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-export:hover { background: rgba(108,140,255,0.2); transform: translateY(-1px); }
-        .filters-section { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; transition: background 0.3s, border 0.3s; }
-        .filter-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
-        .filter-btn { padding: 4px 12px; border-radius: 16px; border: 1px solid transparent; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.06); color: #ccc; }
-        .filter-btn:hover { background: rgba(255,255,255,0.12); }
-        .filter-btn.active { background: #6c8cff; color: #fff; border-color: #6c8cff; }
-        .filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; user-select: none; }
-        .filter-checkbox input[type="checkbox"] { width: 16px; height: 16px; accent-color: #6c8cff; cursor: pointer; }
-        .table-wrap { overflow-x: auto; border-radius: 14px; transition: background 0.3s, border 0.3s; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); }
-        body.light-theme .table-wrap { background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.06); }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 700px; }
-        th { font-weight: 600; padding: 14px 12px; text-align: left; transition: background 0.3s, color 0.3s, border 0.3s; background: rgba(108,140,255,0.12); color: #cfcfcf; border-bottom: 2px solid rgba(108,140,255,0.2); }
-        body.light-theme th { background: rgba(108,140,255,0.15); color: #333; border-bottom: 2px solid rgba(108,140,255,0.3); }
-        td { padding: 12px 12px; word-break: break-all; transition: color 0.3s, border 0.3s; color: #d4d4d4; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        body.light-theme td { color: #333; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        tr:hover td { background: rgba(255,255,255,0.03); }
-        body.light-theme tr:hover td { background: rgba(108,140,255,0.05); }
-        .flags { color: #ffb347; font-weight: 500; font-size: 13px; }
-        .address-cell { font-family: 'Courier New', monospace; font-size: 13px; word-break: break-all; white-space: normal; }
-        .address-cell a { text-decoration: none; transition: color 0.3s; color: #8ab4f8; }
-        body.light-theme .address-cell a { color: #0056b3; }
-        .address-cell a:hover { text-decoration: underline; }
-        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; transition: background 0.3s, color 0.3s; background: rgba(108,140,255,0.15); color: #aac0ff; }
-        body.light-theme .badge { background: rgba(108,140,255,0.1); color: #0056b3; }
-        .no-data-msg { padding: 20px; text-align: center; color: #999; font-size: 15px; }
-        @media (max-width: 768px) { .theme-switch-wrapper { top: 12px; right: 12px; padding: 4px 8px 4px 12px; gap: 8px; } .theme-switch { width: 64px; height: 28px; } .theme-switch .slider { width: 24px; height: 24px; font-size: 13px; } .theme-switch .slider .fa-snowflake { font-size: 13px; } .theme-switch.light .slider { transform: translateX(36px); } .theme-icons { font-size: 12px; } .theme-label { font-size: 12px; } .container { padding: 16px; } .header { flex-direction: column; align-items: flex-start; gap: 12px; } .title-block h1 { font-size: 22px; } .profile { width: 100%; } .form-wrapper { padding: 16px; } .btn-analyze { font-size: 15px; padding: 12px; } table { font-size: 12px; min-width: 500px; } th, td { padding: 8px 6px; } .export-buttons { width: 100%; justify-content: flex-start; } .right-header { width: 100%; justify-content: space-between; } .filters-section { flex-direction: column; align-items: stretch; gap: 10px; } .filter-buttons { justify-content: center; } .filter-checkbox { justify-content: center; } }
-    </style>
-</head>
-<body class="dark-theme">
+from flask import Flask, request, render_template
+from collections import defaultdict
+from math import isclose
+import requests
+import time
 
-    <div class="theme-switch-wrapper">
-        <span class="theme-label">Theme</span>
-        <div class="theme-switch" id="themeSwitch">
-            <div class="theme-icons">
-                <i class="fas fa-moon"></i>
-                <i class="fas fa-sun"></i>
-            </div>
-            <div class="slider" id="slider">
-                <i class="fas fa-snowflake"></i>
-            </div>
-        </div>
-    </div>
+app = Flask(__name__)
 
-    <div class="container">
+MIN_TX_FOR_SPAM = 20
+MAX_AVG_FOR_SPAM = 1.0
+ROUND_TOLERANCE = 1e-9
 
-        <header class="header">
-            <div class="profile">
-                <div class="profile-info">
-                    <span class="profile-name">csinty</span>
-                    <div class="social-links">
-                        <a href="https://t.me/csinty" target="_blank" class="social-link">
-                            <i class="fab fa-telegram-plane"></i> Telegram
-                        </a>
-                        <a href="https://github.com/csinty" target="_blank" class="social-link">
-                            <i class="fab fa-github"></i> GitHub
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="right-header">
-                <div class="title-block">
-                    <h1>
-                        <i class="fas fa-snowflake snowflake-icon" style="color: #6c8cff; font-size: 28px; margin-right: 10px;"></i>
-                        Snow Chain
-                    </h1>
-                    <small>check contractors & flags</small>
-                </div>
-            </div>
-        </header>
+def log(msg):
+    print(f"[DEBUG] {msg}", flush=True)
 
-        <div class="form-wrapper">
-            <form method="POST" id="analyzeForm">
-                <div class="form-group">
-                    <label for="api_key"><i class="fas fa-key"></i> API Key (TonAPI)</label>
-                    <input type="text" id="api_key" name="api_key" placeholder="Paste your API key" value="{{ api_key or '' }}">
-                    <span class="hint">Get a key at <a href="https://tonapi.io" target="_blank">tonapi.io</a></span>
-                </div>
+def fetch_tonapi(account, api_key, limit=100, offset=0):
+    url = f"https://tonapi.io/v2/blockchain/accounts/{account}/transactions"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    if api_key:
+        headers['Authorization'] = f'Bearer {api_key}'
+    params = {"limit": limit, "offset": offset, "sort": "desc"}
+    try:
+        r = requests.get(url, params=params, headers=headers, timeout=30)
+        if r.status_code == 200:
+            data = r.json()
+            txs = data.get("transactions", [])
+            log(f"Loaded {len(txs)} transactions")
+            return txs
+        else:
+            log(f"Error {r.status_code}: {r.text[:200]}")
+            return None
+    except Exception as e:
+        log(f"Exception: {e}")
+        return None
 
-                <div class="form-group">
-                    <label for="address"><i class="fas fa-wallet"></i> Wallet address (EQ... or UQ...)</label>
-                    <input type="text" id="address" name="address" placeholder="EQ... or UQ..." value="{{ address or '' }}">
-                </div>
+def get_all_transactions(account, api_key, limit_per_page=100, max_pages=10):
+    all_txs = []
+    for page in range(max_pages):
+        offset = page * limit_per_page
+        txs = fetch_tonapi(account, api_key, limit_per_page, offset)
+        if txs is None or not txs:
+            break
+        all_txs.extend(txs)
+        time.sleep(0.3)
+    log(f"Total loaded: {len(all_txs)}")
+    return all_txs
 
-                <button type="submit" class="btn-analyze"><i class="fas fa-chart-line"></i> Analyze</button>
-            </form>
+def analyze_all_transfers(txs):
+    stats = defaultdict(lambda: {
+        'in_cnt': 0, 'out_cnt': 0,
+        'in_sum': 0.0, 'out_sum': 0.0,
+        'in_amounts': [], 'out_amounts': []
+    })
+    for tx in txs:
+        in_msg = tx.get('in_msg')
+        if in_msg and isinstance(in_msg, dict):
+            src = in_msg.get('source')
+            if isinstance(src, dict):
+                sender = src.get('address')
+            else:
+                sender = src
+            value = in_msg.get('value')
+            if sender and value is not None:
+                try:
+                    amount = int(value) / 1_000_000_000
+                    stats[sender]['in_cnt'] += 1
+                    stats[sender]['in_sum'] += amount
+                    stats[sender]['in_amounts'].append(amount)
+                except Exception as e:
+                    log(f"Error in in_msg: {e}")
 
-            {% if error %}
-            <div class="error-box">
-                <i class="fas fa-exclamation-circle"></i> {{ error }}
-            </div>
-            {% endif %}
-        </div>
+        out_msgs = tx.get('out_msgs', [])
+        if isinstance(out_msgs, list):
+            for out_msg in out_msgs:
+                if not isinstance(out_msg, dict):
+                    continue
+                dest = out_msg.get('destination')
+                if isinstance(dest, dict):
+                    receiver = dest.get('address')
+                else:
+                    receiver = dest
+                value = out_msg.get('value')
+                if receiver and value is not None:
+                    try:
+                        amount = int(value) / 1_000_000_000
+                        stats[receiver]['out_cnt'] += 1
+                        stats[receiver]['out_sum'] += amount
+                        stats[receiver]['out_amounts'].append(amount)
+                    except Exception as e:
+                        log(f"Error in out_msg: {e}")
 
-        {% if result %}
-        <div class="results-header">
-            <h2>Result (<span id="contractorCount">{{ result|length }}</span> contractors)</h2>
-            <div class="export-buttons">
-                <button class="btn-export" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
-                <button class="btn-export" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
-            </div>
-        </div>
+    log(f"Stats: {len(stats)} unique addresses")
+    return stats
 
-        <div class="filters-section">
-            <div class="filter-buttons" id="filterButtons">
-                <button class="filter-btn" data-limit="10">10</button>
-                <button class="filter-btn" data-limit="25">25</button>
-                <button class="filter-btn active" data-limit="50">50</button>
-                <button class="filter-btn" data-limit="100">100</button>
-                <button class="filter-btn" data-limit="all">All</button>
-            </div>
-            <label class="filter-checkbox">
-                <input type="checkbox" id="hideZero"> Hide zero
-            </label>
-        </div>
+def is_round_amount(amount, tolerance=ROUND_TOLERANCE):
+    return isclose(amount, round(amount), abs_tol=tolerance)
 
-        <div class="table-wrap">
-            <table id="resultTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Address</th>
-                        <th>In</th>
-                        <th>Out</th>
-                        <th>Total</th>
-                        <th>Avg TON</th>
-                        <th>Total TON</th>
-                        <th>Flags</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-            <div id="noDataMsg" class="no-data-msg" style="display:none;">No contractors match the filters.</div>
-        </div>
-        {% endif %}
+def detect_suspicious(data):
+    flags = []
+    total_cnt = data['in_cnt'] + data['out_cnt']
+    total_sum = data['in_sum'] + data['out_sum']
+    avg_amount = total_sum / total_cnt if total_cnt > 0 else 0
 
-    </div>
+    if total_cnt >= MIN_TX_FOR_SPAM and avg_amount < MAX_AVG_FOR_SPAM:
+        flags.append('spam')
+    all_amounts = data['in_amounts'] + data['out_amounts']
+    if all_amounts and all(is_round_amount(a) for a in all_amounts):
+        flags.append('round')
+    if (data['in_cnt'] > 0 and data['out_cnt'] == 0) or (data['out_cnt'] > 0 and data['in_cnt'] == 0):
+        flags.append('oneway')
+    if total_sum == 0:
+        flags.append('zero')
+    return flags
 
-    <script>
-        (function() {
-            const themeSwitch = document.getElementById('themeSwitch');
-            const body = document.body;
-            const snowflakeIcon = document.querySelector('.snowflake-icon');
+def analyze_contractors(wallet_address, api_key, top_n=500):
+    txs = get_all_transactions(wallet_address, api_key)
+    if not txs:
+        return []
+    stats = analyze_all_transfers(txs)
+    if not stats:
+        return []
+    sorted_items = sorted(stats.items(), key=lambda x: (x[1]['in_cnt'] + x[1]['out_cnt'], x[1]['in_sum'] + x[1]['out_sum']), reverse=True)
+    filtered = [(addr, data) for addr, data in sorted_items if addr and addr.strip()]
+    filtered = filtered[:top_n]
+    result = []
+    for addr, data in filtered:
+        total_cnt = data['in_cnt'] + data['out_cnt']
+        total_sum = data['in_sum'] + data['out_sum']
+        avg = total_sum / total_cnt if total_cnt > 0 else 0
+        flags = detect_suspicious(data)
+        result.append({
+            'address': addr,
+            'in_cnt': data['in_cnt'],
+            'out_cnt': data['out_cnt'],
+            'total_cnt': total_cnt,
+            'avg': avg,
+            'total_sum': total_sum,
+            'flags': ', '.join(flags) if flags else '—'
+        })
+    log(f"Found {len(result)} contractors")
+    return result
 
-            function setTheme(theme) {
-                if (theme === 'light') {
-                    body.classList.remove('dark-theme');
-                    body.classList.add('light-theme');
-                    themeSwitch.classList.add('light');
-                    if (snowflakeIcon) snowflakeIcon.style.animationPlayState = 'paused';
-                    localStorage.setItem('theme', 'light');
-                } else {
-                    body.classList.remove('light-theme');
-                    body.classList.add('dark-theme');
-                    themeSwitch.classList.remove('light');
-                    if (snowflakeIcon) snowflakeIcon.style.animationPlayState = 'running';
-                    localStorage.setItem('theme', 'dark');
-                }
-            }
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    result = None
+    error = None
+    address = ''
+    api_key = ''
+    if request.method == 'POST':
+        address = request.form.get('address', '').strip()
+        api_key = request.form.get('api_key', '').strip()
+        if not api_key:
+            error = '❌ Please enter your API key (get it at https://tonapi.io).'
+        elif not address.startswith(('EQ', 'UQ')):
+            error = '❌ Wallet address must start with EQ or UQ.'
+        else:
+            try:
+                contractors = analyze_contractors(address, api_key, top_n=500)
+                if not contractors:
+                    error = '❌ No contractors found or wallet is empty.'
+                else:
+                    result = contractors
+            except Exception as e:
+                error = f'❌ Error: {e}'
+    return render_template('index.html', result=result, error=error, address=address, api_key=api_key)
 
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            setTheme(savedTheme);
-
-            themeSwitch.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const current = body.classList.contains('light-theme') ? 'light' : 'dark';
-                setTheme(current === 'light' ? 'dark' : 'light');
-            });
-
-            const fullData = {{ result | tojson | safe }};
-            if (!fullData || fullData.length === 0) return;
-
-            const tableBody = document.getElementById('tableBody');
-            const contractorCountSpan = document.getElementById('contractorCount');
-            const noDataMsg = document.getElementById('noDataMsg');
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            const hideZeroCheckbox = document.getElementById('hideZero');
-
-            let currentLimit = 50;
-            let hideZero = false;
-
-            function renderTable() {
-                let filtered = fullData;
-                if (hideZero) {
-                    filtered = filtered.filter(c => !c.flags.includes('zero'));
-                }
-                let limited = filtered;
-                if (currentLimit !== 'all') {
-                    limited = filtered.slice(0, currentLimit);
-                }
-                contractorCountSpan.textContent = limited.length;
-                if (limited.length === 0) {
-                    tableBody.innerHTML = '';
-                    noDataMsg.style.display = 'block';
-                    return;
-                }
-                noDataMsg.style.display = 'none';
-                let html = '';
-                limited.forEach((c, index) => {
-                    const addrShort = c.address.slice(0, 12) + '…' + c.address.slice(-8);
-                    html += `<tr>
-                        <td>${index + 1}</td>
-                        <td class="address-cell">
-                            <a href="https://tonscan.org/address/${c.address}" target="_blank" title="Open in Tonscan">
-                                ${addrShort}
-                            </a>
-                        </td>
-                        <td>${c.in_cnt}</td>
-                        <td>${c.out_cnt}</td>
-                        <td>${c.total_cnt}</td>
-                        <td>${c.avg.toFixed(6)}</td>
-                        <td>${c.total_sum.toFixed(9)}</td>
-                        <td class="flags">${c.flags}</td>
-                    </tr>`;
-                });
-                tableBody.innerHTML = html;
-            }
-
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    filterButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    const limit = this.dataset.limit;
-                    currentLimit = limit === 'all' ? 'all' : parseInt(limit, 10);
-                    renderTable();
-                });
-            });
-
-            hideZeroCheckbox.addEventListener('change', function() {
-                hideZero = this.checked;
-                renderTable();
-            });
-
-            renderTable();
-
-            document.getElementById('exportCsvBtn')?.addEventListener('click', function() {
-                let filteredData = fullData;
-                if (hideZero) {
-                    filteredData = filteredData.filter(c => !c.flags.includes('zero'));
-                }
-                let exportData = filteredData;
-                if (currentLimit !== 'all') {
-                    exportData = filteredData.slice(0, currentLimit);
-                }
-                if (exportData.length === 0) return;
-
-                let csv = '\uFEFF';
-                csv += 'Snow Chain – TON Wallet Analysis Report\n';
-                csv += `Generated: ${new Date().toLocaleString()}\n`;
-                csv += `Total contractors: ${exportData.length}\n\n`;
-                csv += '№;Address;In;Out;Total;Avg TON;Total TON;Flags\n';
-                exportData.forEach((c, idx) => {
-                    csv += `${idx+1};${c.address};${c.in_cnt};${c.out_cnt};${c.total_cnt};${c.avg.toFixed(6)};${c.total_sum.toFixed(9)};${c.flags}\n`;
-                });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `snow_chain_${new Date().toISOString().slice(0,10)}.csv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-            });
-
-            document.getElementById('exportPdfBtn')?.addEventListener('click', function() {
-                let filteredData = fullData;
-                if (hideZero) {
-                    filteredData = filteredData.filter(c => !c.flags.includes('zero'));
-                }
-                let exportData = filteredData;
-                if (currentLimit !== 'all') {
-                    exportData = filteredData.slice(0, currentLimit);
-                }
-                if (exportData.length === 0) return;
-
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('landscape', 'mm', 'a4');
-
-                doc.setFillColor(108, 140, 255);
-                doc.rect(0, 0, doc.internal.pageSize.getWidth(), 20, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(18);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Snow Chain – TON Wallet Analysis Report', 14, 14);
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
-                doc.text(`Total contractors: ${exportData.length}`, 14, 34);
-
-                const headers = ['#', 'Address', 'In', 'Out', 'Total', 'Avg TON', 'Total TON', 'Flags'];
-                const tableRows = exportData.map((c, idx) => [
-                    idx+1,
-                    c.address,
-                    c.in_cnt,
-                    c.out_cnt,
-                    c.total_cnt,
-                    c.avg.toFixed(6),
-                    c.total_sum.toFixed(9),
-                    c.flags
-                ]);
-
-                doc.autoTable({
-                    head: [headers],
-                    body: tableRows,
-                    startY: 40,
-                    theme: 'striped',
-                    headStyles: { fillColor: [108, 140, 255], textColor: [255,255,255], fontSize: 9, halign: 'left' },
-                    styles: { fontSize: 7, cellPadding: 2, textColor: [50,50,50] },
-                    columnStyles: {
-                        1: { cellWidth: 'auto', fontSize: 6, fontStyle: 'normal' },
-                    },
-                    didDrawPage: function(data) {
-                        doc.setFontSize(8);
-                        doc.setTextColor(150);
-                        doc.text(`Page ${data.pageNumber} of ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
-                    }
-                });
-
-                doc.save(`snow_chain_${new Date().toISOString().slice(0,10)}.pdf`);
-            });
-
-        })();
-    </script>
-</body>
-</html>
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
