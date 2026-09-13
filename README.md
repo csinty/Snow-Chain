@@ -21,8 +21,11 @@ Supported networks: TON, ETH, BTC, USDT (TRC20).
 ## API Keys
 
 TON — required — https://tonapi.io
+
 ETH — required — https://etherscan.io/myapikey
+
 BTC — not required, uses public mempool.space API
+
 USDT (TRC20) — optional — https://www.trongrid.io
 
 ## Installation
