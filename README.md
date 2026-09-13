@@ -4,8 +4,6 @@ A lightweight multi-chain contractor analyzer. Fetches transaction data for a wa
 
 Supported networks: TON, ETH, BTC, USDT (TRC20).
 
-<img width="1768" height="889" alt="20276079-9b1d-4794-95d6-ac036d28643a" src="https://github.com/user-attachments/assets/66dd8cae-285a-42a5-965c-36e46a858906" />
-
 ## Features
 
 - Tabbed interface for TON / ETH / BTC / USDT (TRC20)
