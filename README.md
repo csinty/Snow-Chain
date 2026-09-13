@@ -1,19 +1,35 @@
 <img width="1489" height="1056" alt="b2ba24ce-c9d7-4791-ae42-d58922932829" src="https://github.com/user-attachments/assets/98a411ce-fc47-4909-a9c4-e86205e0035b" />
 
-Snow Chain is a lightweight web tool for TON wallet analysis.
-It fetches transaction data through the TonAPI service, displays counterparty stats (in/out counts, total and average amounts), and automatically flags suspicious patterns: spam, oneway, round, and zero.
-You can filter results, switch between dark/light themes, and export the table to CSV or PDF.
+# Snow Chain
 
-<img width="1771" height="888" alt="image" src="https://github.com/user-attachments/assets/fa4a3b20-8461-4cd6-981a-4a8f8a3dffd1" />
+A lightweight multi-chain contractor analyzer. Fetches transaction data for a wallet and shows counterparty stats — in/out counts, total and average amounts. For TON it also flags suspicious patterns: spam, oneway, round, and zero.
 
-API Key
-Get a free API key at https://tonapi.io and paste it into the form on the website.
+Supported networks: TON, ETH, BTC, USDT (TRC20).
 
-Contacts: 
-Telegram: t.me/csinty
-Discord: csinty_osint
+<img width="1768" height="889" alt="20276079-9b1d-4794-95d6-ac036d28643a" src="https://github.com/user-attachments/assets/66dd8cae-285a-42a5-965c-36e46a858906" />
 
- ```bash
+## Features
+
+- Tabbed interface for TON / ETH / BTC / USDT (TRC20)
+- Per-network API key input
+- Counterparty table: address, in/out counts, total, average, total sum
+- Flags for TON wallets (spam / oneway / round / zero)
+- Filters: 10 / 25 / 50 / 100 / all
+- "Hide zero" toggle for TON
+- Dark / light theme (saved in localStorage)
+- Export results to CSV and PDF
+- Full pagination for all networks
+
+## API Keys
+
+| TON | required | https://tonapi.io |
+| ETH | required | https://etherscan.io/myapikey |
+| BTC | not required | uses public mempool.space API |
+| USDT (TRC20) | optional | https://www.trongrid.io |
+
+## Installation
+
+```bash
 git clone https://github.com/csinty/Snow-Chain.git
 cd Snow-Chain
 pip install -r requirements.txt
