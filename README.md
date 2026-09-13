@@ -1,7 +1,5 @@
 <img width="1489" height="1056" alt="b2ba24ce-c9d7-4791-ae42-d58922932829" src="https://github.com/user-attachments/assets/98a411ce-fc47-4909-a9c4-e86205e0035b" />
 
-# Snow Chain
-
 A lightweight multi-chain contractor analyzer. Fetches transaction data for a wallet and shows counterparty stats — in/out counts, total and average amounts. For TON it also flags suspicious patterns: spam, oneway, round, and zero.
 
 Supported networks: TON, ETH, BTC, USDT (TRC20).
@@ -22,10 +20,10 @@ Supported networks: TON, ETH, BTC, USDT (TRC20).
 
 ## API Keys
 
-| TON | required | https://tonapi.io |
-| ETH | required | https://etherscan.io/myapikey |
-| BTC | not required | uses public mempool.space API |
-| USDT (TRC20) | optional | https://www.trongrid.io |
+TON — required — https://tonapi.io
+ETH — required — https://etherscan.io/myapikey
+BTC — not required, uses public mempool.space API
+USDT (TRC20) — optional — https://www.trongrid.io
 
 ## Installation
 
